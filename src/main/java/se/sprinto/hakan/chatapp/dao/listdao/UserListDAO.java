@@ -1,6 +1,7 @@
-package se.sprinto.hakan.chatapp.dao;
+package se.sprinto.hakan.chatapp.dao.listdao;
 
 
+import se.sprinto.hakan.chatapp.dao.UserDAO;
 import se.sprinto.hakan.chatapp.model.User;
 
 import java.util.ArrayList;

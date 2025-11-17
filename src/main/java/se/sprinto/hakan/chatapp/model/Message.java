@@ -15,6 +15,19 @@ public class Message {
         this.timestamp = timestamp;
     }
 
+    //la till konstruktor för id
+    public Message(int id, int userId, String text, LocalDateTime timestamp) {
+        this.id = id;
+        this.userId = userId;
+        this.text = text;
+        this.timestamp = timestamp;
+    }
+
+    public String toString() {
+        return id + " " + userId + " " + text + " " + timestamp;
+    }
+
+
     public int getUserId() {
         return userId;
     }
@@ -26,5 +39,12 @@ public class Message {
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
+
+    //skapade en setId som sparas när man lagrar meddelandet i databasen
+    public void setId(int id) {
+        this.id = id;
+    }
+
+
 }
 

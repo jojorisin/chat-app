@@ -1,6 +1,7 @@
-package se.sprinto.hakan.chatapp.dao;
+package se.sprinto.hakan.chatapp.dao.listdao;
 
 
+import se.sprinto.hakan.chatapp.dao.MessageDAO;
 import se.sprinto.hakan.chatapp.model.Message;
 
 import java.time.LocalDateTime;

@@ -22,6 +22,7 @@ public class User {
         this.username = username;
         this.password = password;
     }
+    
 
     public int getId() {
         return id;
@@ -46,6 +47,7 @@ public class User {
     public void addMessage(Message message) {
         messages.add(message);
     }
+
 
     public void setPassword(String password) {
         this.password = password;
