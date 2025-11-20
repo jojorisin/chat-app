@@ -16,10 +16,11 @@ import java.sql.Statement;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class integrationTest {
+public class IntegrationTest {
 
+    //Arrangerar tabellerna för mitt test.
     @BeforeEach
     void setup() {
 
@@ -49,6 +50,7 @@ public class integrationTest {
 
     }
 
+    //Registrerar en ny användare och skapar två meddelanden.
     @Test
     void test() {
         UserDAO userDAO = new UserDatabaseDao();
@@ -62,7 +64,8 @@ public class integrationTest {
         messageDAO.saveMessage(m2);
         List<Message> userMessages = messageDAO.getMessagesByUserId(user.getId());
 
-        assertTrue(userMessages.size() == 2, "Should be 2 messages");
+        //Testet passerar om users lista med meddelanden innehåller 2 meddelanden
+        assertEquals(2, userMessages.size(), "Should be 2 messages");
 
     }
 }

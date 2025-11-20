@@ -3,6 +3,7 @@ package se.sprinto.hakan.chatapp.dao.databasedao;
 import se.sprinto.hakan.chatapp.constants.DBConstants;
 import se.sprinto.hakan.chatapp.constants.ErrorMessages;
 import se.sprinto.hakan.chatapp.dao.MessageDAO;
+import se.sprinto.hakan.chatapp.exception.DataAccessException;
 import se.sprinto.hakan.chatapp.model.Message;
 import se.sprinto.hakan.chatapp.util.DatabaseConnector;
 
@@ -27,12 +28,13 @@ public class MessageDatabaseDao implements MessageDAO {
                 }
             }
         } catch (SQLException e) {
-            System.out.println(ErrorMessages.DATA_ACCESS_ERROR);
-            e.printStackTrace();
+            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
         }
         return messages;
     }
 
+    //jag skapar ett id i databasen, men jag lämnar det oanvänt eftersom
+    //det ej fanns setters eller getters för id i koden eller en konstruktor
     @Override
     public void saveMessage(Message message) {
         String sql = "INSERT INTO messages (user_id, message, created_at) VALUES(?,?,?)";
@@ -44,26 +46,26 @@ public class MessageDatabaseDao implements MessageDAO {
 
             int rowsAffected = pstmt.executeUpdate();
             System.out.println(DBConstants.ROWS_AFFECTED + rowsAffected);
-            try (ResultSet rs = pstmt.getGeneratedKeys()) {
+            //metid för att hämta id-från databas och sätta i message om man löser setter
+            /*try (ResultSet rs = pstmt.getGeneratedKeys()) {
                 if (rs.next()) {
+
                     message.setId(rs.getInt(1));
                 }
-            }
+            }*/
         } catch (SQLException e) {
-            System.out.println(ErrorMessages.DATA_ACCESS_ERROR);
-            e.printStackTrace();
+            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
         }
 
     }
 
 
     private Message mapMessage(ResultSet rs) throws SQLException {
-        int messageId = rs.getInt("message_id");
         int userId = rs.getInt("user_id");
         String text = rs.getString("message");
         LocalDateTime timestamp = rs.getTimestamp("created_at").toLocalDateTime();
 
-        return new Message(messageId, userId, text, timestamp);
+        return new Message(userId, text, timestamp);
 
 
     }

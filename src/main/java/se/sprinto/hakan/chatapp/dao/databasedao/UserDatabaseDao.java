@@ -3,6 +3,8 @@ package se.sprinto.hakan.chatapp.dao.databasedao;
 import se.sprinto.hakan.chatapp.constants.DBConstants;
 import se.sprinto.hakan.chatapp.constants.ErrorMessages;
 import se.sprinto.hakan.chatapp.dao.UserDAO;
+import se.sprinto.hakan.chatapp.exception.DataAccessException;
+import se.sprinto.hakan.chatapp.exception.UsernameNotUniqueException;
 import se.sprinto.hakan.chatapp.model.Message;
 import se.sprinto.hakan.chatapp.model.User;
 import se.sprinto.hakan.chatapp.util.DatabaseConnector;
@@ -32,7 +34,7 @@ public class UserDatabaseDao implements UserDAO {
 
                 do {
                     if (rs.getObject("message_id") != null) {
-                        Message message = new Message(rs.getInt("message_id"), rs.getInt("user_id"),
+                        Message message = new Message(rs.getInt("user_id"),
                                 rs.getString("message"), rs.getTimestamp("created_at").toLocalDateTime());
                         user.addMessage(message);
 
@@ -46,17 +48,22 @@ public class UserDatabaseDao implements UserDAO {
 
             }
         } catch (SQLException e) {
-            System.out.println(ErrorMessages.DATA_ACCESS_ERROR);
-            e.printStackTrace();
+            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
         }
-        return user;
 
 
     }
 
-
+    //Clienthandler måste fånga exceptions
     @Override
     public User register(User user) {
+        try {
+            if (!isUniqueUsername(user.getUsername())) {
+                throw new UsernameNotUniqueException(ErrorMessages.INVALID_USERNAME);
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
+        }
         String sql = "INSERT INTO users (username,password) VALUES(?,?)";
         try (Connection conn = DatabaseConnector.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -71,11 +78,27 @@ public class UserDatabaseDao implements UserDAO {
                     user.setId(rs.getInt(1));
                 }
             }
+            return user;
         } catch (SQLException e) {
-            System.out.println(ErrorMessages.DATA_ACCESS_ERROR);
-            e.printStackTrace();
+            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
         }
-        return user;
+
+    }
+
+    private boolean isUniqueUsername(String username) throws SQLException {
+
+        String sql = "SELECT username FROM users WHERE username=?";
+        try (Connection conn = DatabaseConnector.getInstance().getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, username);
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
     }
 
 
