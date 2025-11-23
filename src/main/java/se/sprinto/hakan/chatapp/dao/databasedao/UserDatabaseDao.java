@@ -57,16 +57,13 @@ public class UserDatabaseDao implements UserDAO {
     //Clienthandler måste fånga exceptions
     @Override
     public User register(User user) {
-        try {
-            if (!isUniqueUsername(user.getUsername())) {
-                throw new UsernameNotUniqueException(ErrorMessages.INVALID_USERNAME);
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException(ErrorMessages.DATA_ACCESS_ERROR, e);
-        }
+
         String sql = "INSERT INTO users (username,password) VALUES(?,?)";
         try (Connection conn = DatabaseConnector.getInstance().getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            if (!isUniqueUsername(user.getUsername(), conn)) {
+                throw new UsernameNotUniqueException(ErrorMessages.INVALID_USERNAME);
+            }
             pstmt.setString(1, user.getUsername());
             pstmt.setString(2, user.getPassword());
 
@@ -85,18 +82,15 @@ public class UserDatabaseDao implements UserDAO {
 
     }
 
-    private boolean isUniqueUsername(String username) throws SQLException {
+    private boolean isUniqueUsername(String username, Connection conn) throws SQLException {
 
         String sql = "SELECT username FROM users WHERE username=?";
-        try (Connection conn = DatabaseConnector.getInstance().getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, username);
             try (ResultSet rs = pstmt.executeQuery()) {
-                if (rs.next()) {
-                    return false;
-                }
+                return !rs.next();
             }
-            return true;
+
         }
 
     }

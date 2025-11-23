@@ -61,6 +61,7 @@ public class MessageDatabaseDao implements MessageDAO {
 
 
     private Message mapMessage(ResultSet rs) throws SQLException {
+        //int id=rs.getInt("message_id");
         int userId = rs.getInt("user_id");
         String text = rs.getString("message");
         LocalDateTime timestamp = rs.getTimestamp("created_at").toLocalDateTime();
